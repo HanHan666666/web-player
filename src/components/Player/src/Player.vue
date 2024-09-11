@@ -17,9 +17,9 @@ onMounted(() => {
   player = new Player({
     el: xgplayer.value,
     url: props.file,
-    // fluid: true,
-    width: "50vw",
-    height: "70vh",
+    fluid: true,
+    width: 600,
+    height: 350,
   });
 });
 

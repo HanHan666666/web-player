@@ -4,17 +4,20 @@
     <ul>
       <li v-for="(file, index) in files" :key="index">
         <button @click="emitFileSelected(file)">
-          {{ directoryName + '/' + file.fileName }}
-          <span v-if="file.duration"> {{ formatDuration(file.duration) }}</span>
+          <span class="file-name">
+            {{ directoryName + '/' + file.fileName }}
+          </span>
+          <span v-if="file.duration" class="file-duration">
+            {{ formatDuration(file.duration) }}
+          </span>
         </button>
       </li>
     </ul>
   </div>
 </template>
-
 <script setup lang="ts">
-import { ref } from 'vue';
-import MingcuteTimeLine from '~icons/mingcute/time-line';
+import {ref} from 'vue';
+
 const emit = defineEmits(['file-selected']);
 const files = ref<{ fileHandle: FileSystemFileHandle, fileName: string, duration?: number }[]>([]);
 const directoryName = ref('');
@@ -34,7 +37,7 @@ async function listFilesInDirectory() {
         const fileUrl = URL.createObjectURL(file); // 生成文件URL
         const duration = await getVideoDuration(fileUrl); // 获取视频时长
 
-        files.value.push({ fileHandle, fileName: file.name, duration });
+        files.value.push({fileHandle, fileName: file.name, duration});
       }
     }
   } catch (error) {
@@ -72,6 +75,7 @@ function formatDuration(duration: number): string {
 }
 </script>
 
+
 <style scoped>
 ul {
   width: 100%;
@@ -80,13 +84,29 @@ ul {
 }
 
 li {
-  button{
+  width: 100%;
+  margin-bottom: 10px;
+
+  button {
     display: flex;
     width: 100%;
     justify-content: space-between;
-
+    align-items: center;
+    padding: 5px;
   }
-  width: 100%;
-  margin-bottom: 10px;
+
+  .file-name {
+    flex-grow: 1;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .file-duration {
+    text-align: right;
+    flex-shrink: 0;
+    padding-left: 10px;
+  }
 }
 </style>
