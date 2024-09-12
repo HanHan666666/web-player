@@ -3,8 +3,11 @@
     <button @click="selectDirectory">选择文件夹</button>
     <ul>
       <li v-for="(file, index) in files" :key="file.fileName">
-        <button @click="emitFileSelected(file)">
+        <button @click="emitFileSelected(file)" :class="file.isDirectory ? '' : 'ml-18px'">
+
           <span class="file-name">
+            <span v-if="file.isDirectory">📁</span>
+            <span v-else >📄</span>
             {{ file.fileName }}
           </span>
           <span v-if="file.duration" class="file-duration">
@@ -19,7 +22,7 @@
 import {ref} from 'vue';
 
 const emit = defineEmits(['file-selected']);
-const files = ref<{ fileHandle: FileSystemFileHandle, fileName: string, duration?: number }[]>([]);
+const files = ref<{ fileHandle: FileSystemFileHandle, fileName: string, duration?: number, isDirectory: boolean }[]>([]);
 
 async function selectDirectory() {
   try {
@@ -58,25 +61,26 @@ async function traverseDirectory(entries: { entry: FileSystemHandle, path: strin
       const file = await fileHandle.getFile();
       const fileUrl = URL.createObjectURL(file);
       const duration = await getVideoDuration(fileUrl);
-      const filePath = parentPath ? `📂${parentPath}/📄${file.name}` : `📄${file.name}`;
 
-      files.value.push({ fileHandle, fileName: filePath, duration });
+      // 只保留文件名，不包含路径
+      files.value.push({ fileHandle, fileName: file.name, duration, isDirectory: false });
     } else if (entry.kind === 'directory') {
-      const subDirectoryPath = parentPath ? `📂${parentPath}/📄${entry.name}` : `${entry.name}`;
+      const subDirectoryPath = parentPath ? `${parentPath}/${entry.name}` : `${entry.name}`;
       const subEntries = [];
       for await (const subEntry of entry.values()) {
-        subEntries.push({ entry: subEntry, path: `📂${subDirectoryPath}/📄${subEntry.name}` });
+        subEntries.push({ entry: subEntry, path: `${subDirectoryPath}/${subEntry.name}` });
       }
 
       // 对子文件夹中的文件和子文件夹按完整路径进行排序
       subEntries.sort((a, b) => naturalSort(a.path, b.path));
 
+      files.value.push({ fileHandle: entry, fileName: subDirectoryPath, isDirectory: true });
       await traverseDirectory(subEntries, entry, subDirectoryPath);
     }
   }
 }
 
-async function emitFileSelected(fileItem: { fileHandle: FileSystemFileHandle, fileName: string, duration?: number }) {
+async function emitFileSelected(fileItem: { fileHandle: FileSystemFileHandle, fileName: string, duration?: number, isDirectory: boolean }) {
   try {
     const fileData = await fileItem.fileHandle.getFile();
     const fileUrl = URL.createObjectURL(fileData);

@@ -12,7 +12,7 @@ const handleFileSelected = (file: string) => {
 
 <template>
   <div class="flex w-95vw p-10px overflow-visible">
-    <div class="p-10px w-22vw">
+    <div class="p-10px w-22vw mr-10px">
       <FileList @file-selected="handleFileSelected"/>
     </div>
     <div class="p-10px w-full position-relative">
