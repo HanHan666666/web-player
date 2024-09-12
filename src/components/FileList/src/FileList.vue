@@ -1,11 +1,11 @@
 <template>
   <div>
-    <button @click="listFilesInDirectory">选择文件</button>
+    <button @click="selectDirectory">选择文件夹</button>
     <ul>
-      <li v-for="(file, index) in files" :key="index">
+      <li v-for="(file, index) in files" :key="file.fileName">
         <button @click="emitFileSelected(file)">
           <span class="file-name">
-            {{ directoryName + '/' + file.fileName }}
+            {{ file.fileName }}
           </span>
           <span v-if="file.duration" class="file-duration">
             {{ formatDuration(file.duration) }}
@@ -20,28 +20,59 @@ import {ref} from 'vue';
 
 const emit = defineEmits(['file-selected']);
 const files = ref<{ fileHandle: FileSystemFileHandle, fileName: string, duration?: number }[]>([]);
-const directoryName = ref('');
 
-async function listFilesInDirectory() {
+async function selectDirectory() {
   try {
     const directoryHandle = await window.showDirectoryPicker();
-    directoryName.value = directoryHandle.name;
+    await listFilesInDirectory(directoryHandle);
+  } catch (error) {
+    console.error('Error selecting directory:', error);
+  }
+}
 
+async function listFilesInDirectory(directoryHandle: FileSystemDirectoryHandle) {
+  try {
     files.value = [];
-
-    // 遍历文件夹中的文件
+    const entries = [];
     for await (const entry of directoryHandle.values()) {
-      if (entry.kind === 'file') {
-        const fileHandle = entry; // 这是FileSystemFileHandle对象
-        const file = await fileHandle.getFile(); // 获取文件对象
-        const fileUrl = URL.createObjectURL(file); // 生成文件URL
-        const duration = await getVideoDuration(fileUrl); // 获取视频时长
-
-        files.value.push({fileHandle, fileName: file.name, duration});
-      }
+      entries.push({ entry, path: entry.name });
     }
+
+    // 对当前文件夹中的文件和子文件夹按完整路径进行排序
+    entries.sort((a, b) => naturalSort(a.path, b.path));
+
+    await traverseDirectory(entries, directoryHandle, '');
   } catch (error) {
     console.error('Error accessing the directory:', error);
+  }
+}
+// 自定义排序函数，按自然数顺序排列文件名
+function naturalSort(a: string, b: string) {
+  return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+}
+
+async function traverseDirectory(entries: { entry: FileSystemHandle, path: string }[], directoryHandle: FileSystemDirectoryHandle, parentPath: string) {
+  for (const { entry, path } of entries) {
+    if (entry.kind === 'file') {
+      const fileHandle = entry;
+      const file = await fileHandle.getFile();
+      const fileUrl = URL.createObjectURL(file);
+      const duration = await getVideoDuration(fileUrl);
+      const filePath = parentPath ? `📂${parentPath}/📄${file.name}` : `📄${file.name}`;
+
+      files.value.push({ fileHandle, fileName: filePath, duration });
+    } else if (entry.kind === 'directory') {
+      const subDirectoryPath = parentPath ? `📂${parentPath}/📄${entry.name}` : `${entry.name}`;
+      const subEntries = [];
+      for await (const subEntry of entry.values()) {
+        subEntries.push({ entry: subEntry, path: `📂${subDirectoryPath}/📄${subEntry.name}` });
+      }
+
+      // 对子文件夹中的文件和子文件夹按完整路径进行排序
+      subEntries.sort((a, b) => naturalSort(a.path, b.path));
+
+      await traverseDirectory(subEntries, entry, subDirectoryPath);
+    }
   }
 }
 

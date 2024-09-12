@@ -18,6 +18,7 @@ onMounted(() => {
     player = new Player({
       el: xgplayer.value,
       url: props.file,
+      playsinline: true,
       fluid: true,
       width: 600,
       height: 350,
