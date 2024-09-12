@@ -1,6 +1,7 @@
 <template>
   <div>
     <button @click="selectDirectory">选择文件夹</button>
+    <button class="ml-18px" @click="selectFile">选择文件</button>
     <ul>
       <li v-for="(file, index) in files" :key="file.fileName">
         <button @click="emitFileSelected(file)" :class="file.isDirectory ? '' : 'ml-18px'">
@@ -107,6 +108,19 @@ function formatDuration(duration: number): string {
   const minutes = Math.floor(duration / 60);
   const seconds = Math.floor(duration % 60);
   return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+}
+
+async function selectFile() {
+  try {
+    const [fileHandle] = await window.showOpenFilePicker();
+    const file = await fileHandle.getFile();
+    const fileUrl = URL.createObjectURL(file);
+    const duration = await getVideoDuration(fileUrl);
+
+    files.value.push({ fileHandle, fileName: file.name, duration, isDirectory: false });
+  } catch (error) {
+    console.error('Error selecting file:', error);
+  }
 }
 </script>
 
