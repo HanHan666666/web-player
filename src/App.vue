@@ -3,7 +3,7 @@ import Index from "./views/Index/index.vue";
 </script>
 
 <template>
-  <div class="overflow-auto">
+  <div class="overflow-visible">
     <Index/>
   </div>
 </template>

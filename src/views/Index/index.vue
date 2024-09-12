@@ -11,12 +11,12 @@ const handleFileSelected = (file: string) => {
 </script>
 
 <template>
-  <div class="flex w-95vw p-10px">
+  <div class="flex w-95vw p-10px overflow-visible">
     <div class="p-10px w-22vw">
       <FileList @file-selected="handleFileSelected"/>
     </div>
     <div class="p-10px w-full position-relative">
-      <Player :file="selectedFile" class="position-sticky top-0" />
+      <Player :file="selectedFile" class="position-sticky top-10" />
     </div>
   </div>
 </template>

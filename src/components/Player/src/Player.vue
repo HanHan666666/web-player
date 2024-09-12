@@ -2,7 +2,7 @@
   <div ref="vs"></div>
 </template>
 <script setup lang="ts">
-import { onMounted, useTemplateRef, watch } from "vue";
+import {onMounted, useTemplateRef, watch} from "vue";
 import Player from 'xgplayer';
 import 'xgplayer/dist/xgplayer.css';
 
@@ -14,13 +14,17 @@ const xgplayer = useTemplateRef('vs');
 let player: Player | null = null;
 
 onMounted(() => {
-  player = new Player({
-    el: xgplayer.value,
-    url: props.file,
-    fluid: true,
-    width: 600,
-    height: 350,
-  });
+  if (xgplayer.value) {
+    player = new Player({
+      el: xgplayer.value,
+      url: props.file,
+      fluid: true,
+      width: 600,
+      height: 350,
+    });
+  } else {
+    console.error('xgplayer is not ready', xgplayer.value);
+  }
 });
 
 watch(() => props.file, (newFile) => {

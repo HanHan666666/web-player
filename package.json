@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/wicg-file-system-access": "^2023.10.5",
     "unplugin-icons": "^0.19.3",
     "vue": "^3.5.0",
     "xgplayer": "3.0.0-alpha.138",
@@ -16,6 +17,7 @@
   },
   "devDependencies": {
     "@iconify/json": "^2.2.246",
+    "@types/node": "^22.5.4",
     "@vitejs/plugin-vue": "^5.1.2",
     "typescript": "^5.5.3",
     "unocss": "^0.62.3",
