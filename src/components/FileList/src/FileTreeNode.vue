@@ -24,9 +24,9 @@
 </template>
 
 <script setup lang="ts">
-import {PropType} from 'vue';
+import {defineProps, defineEmits, PropType} from 'vue';
 
-// 定义 FileTreeNode 组件的 props 和 emit
+// 定义 FileTreeNode 的 props
 const props = defineProps({
   file: {
     type: Object as PropType<{
@@ -41,9 +41,10 @@ const props = defineProps({
   },
 });
 
+// 定义 emit 事件
 const emit = defineEmits(['file-selected']);
 
-// 点击展开或折叠文件夹
+// 点击展开或折叠目录
 const toggleExpand = () => {
   if (props.file.isDirectory) {
     props.file.isExpanded = !props.file.isExpanded;
@@ -52,7 +53,7 @@ const toggleExpand = () => {
   }
 };
 
-// 格式化视频文件的时长显示
+// 格式化视频时长
 function formatDuration(duration: number): string {
   const minutes = Math.floor(duration / 60);
   const seconds = Math.floor(duration % 60);

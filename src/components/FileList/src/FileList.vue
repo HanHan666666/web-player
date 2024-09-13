@@ -14,11 +14,10 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue';
-import FileTreeNode from "./FileTreeNode.vue";
+import { ref } from 'vue';
+import FileTreeNode from './FileTreeNode.vue'; // 引入 FileTreeNode 组件
 
-const emit = defineEmits(['file-selected']);
-
+// 定义文件结构类型
 type FileItem = {
   fileHandle: FileSystemFileHandle | FileSystemDirectoryHandle;
   fileName: string;
@@ -33,19 +32,22 @@ const files = ref<FileItem[]>([]);
 async function selectDirectory() {
   try {
     const directoryHandle = await window.showDirectoryPicker();
-    files.value = await traverseDirectory(directoryHandle);
+
+    // 将顶级文件夹添加到 files 中并设置为默认展开
+    files.value = [{
+      fileHandle: directoryHandle,
+      fileName: directoryHandle.name,
+      isDirectory: true,
+      isExpanded: true, // 默认展开顶级目录
+      children: await traverseDirectory(directoryHandle),
+    }];
   } catch (error) {
     console.error('Error selecting directory:', error);
   }
 }
 
-function naturalSort(a: string, b: string) {
-  return a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'});
-}
-
-async function traverseDirectory(
-    directoryHandle: FileSystemDirectoryHandle
-): Promise<FileItem[]> {
+// 递归遍历文件夹
+async function traverseDirectory(directoryHandle: FileSystemDirectoryHandle): Promise<FileItem[]> {
   const items: FileItem[] = [];
 
   for await (const entry of directoryHandle.values()) {
@@ -70,7 +72,7 @@ async function traverseDirectory(
         fileName: subDirectoryHandle.name,
         isDirectory: true,
         children,
-        isExpanded: false, // 目录默认是折叠的
+        isExpanded: false, // 子文件夹默认折叠
       });
     }
   }
@@ -81,20 +83,31 @@ async function traverseDirectory(
   return items;
 }
 
-async function emitFileSelected(fileItem: FileItem) {
-  if (fileItem.isDirectory) {
-    // 对目录点击不进行处理
-    return;
-  }
+// 自然排序
+function naturalSort(a: string, b: string): number {
+  return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+}
+
+// 选择文件并获取视频时长
+async function selectFile() {
   try {
-    const fileData = await (fileItem.fileHandle as FileSystemFileHandle).getFile();
-    const fileUrl = URL.createObjectURL(fileData);
-    emit('file-selected', fileUrl);
+    const [fileHandle] = await window.showOpenFilePicker();
+    const file = await fileHandle.getFile();
+    const fileUrl = URL.createObjectURL(file);
+    const duration = await getVideoDuration(fileUrl);
+
+    files.value.push({
+      fileHandle,
+      fileName: file.name,
+      duration,
+      isDirectory: false,
+    });
   } catch (error) {
-    console.error('Error reading file:', error);
+    console.error('Error selecting file:', error);
   }
 }
 
+// 格式化视频时长
 async function getVideoDuration(fileUrl: string): Promise<number | undefined> {
   return new Promise((resolve) => {
     const video = document.createElement('video');
@@ -108,40 +121,45 @@ async function getVideoDuration(fileUrl: string): Promise<number | undefined> {
   });
 }
 
-
+function emitFileSelected(fileItem: FileItem) {
+  if (!fileItem.isDirectory) {
+    // Emit the file-selected event to handle file opening
+    console.log(`Selected file: ${fileItem.fileName}`);
+  }
+}
 </script>
 
 <style scoped>
 ul {
   width: 100%;
   list-style-type: none;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding: 0;
 }
 
 li {
-  margin-bottom: 5px;
-}
-
-button {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   width: 100%;
-  padding: 5px;
-}
+  margin-bottom: 10px;
 
-.file-name {
-  flex-grow: 1;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+  button {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+  }
 
-.file-duration {
-  text-align: right;
-  flex-shrink: 0;
-  padding-left: 10px;
+  .file-name {
+    flex-grow: 1;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .file-duration {
+    text-align: right;
+    flex-shrink: 0;
+    padding-left: 10px;
+  }
 }
 </style>
