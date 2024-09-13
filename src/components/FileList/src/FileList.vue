@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import FileTreeNode from './FileTreeNode.vue'; // 引入 FileTreeNode 组件
+import FileTreeNode from './FileTreeNode.vue'; // 引入FileTreeNode组件
 
 // 定义文件结构类型
 type FileItem = {
@@ -77,15 +77,23 @@ async function traverseDirectory(directoryHandle: FileSystemDirectoryHandle): Pr
     }
   }
 
-  // 对文件和文件夹进行自然排序
-  items.sort((a, b) => naturalSort(a.fileName, b.fileName));
+  // 使用自然排序，先文件夹后文件
+  items.sort(naturalSort);
 
   return items;
 }
 
-// 自然排序
-function naturalSort(a: string, b: string): number {
-  return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+// 自然排序，文件夹在前，文件在后
+function naturalSort(a: FileItem, b: FileItem): number {
+  // 首先根据是否为目录进行排序，目录在前，文件在后
+  if (a.isDirectory && !b.isDirectory) {
+    return -1; // a 是文件夹，b 是文件，a 应该排在 b 前
+  } else if (!a.isDirectory && b.isDirectory) {
+    return 1;  // a 是文件，b 是文件夹，a 应该排在 b 后
+  } else {
+    // 如果两者都是文件或两者都是文件夹，按名称自然排序
+    return a.fileName.localeCompare(b.fileName, undefined, { numeric: true, sensitivity: 'base' });
+  }
 }
 
 // 选择文件并获取视频时长
