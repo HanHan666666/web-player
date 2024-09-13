@@ -15,8 +15,8 @@ const handleFileSelected = (file: string) => {
     <div class="p-10px w-22vw mr-10px">
       <FileList @file-selected="handleFileSelected"/>
     </div>
-    <div class="p-10px w-full position-relative">
-      <Player :file="selectedFile" class="position-sticky top-10" />
+    <div class="p-10px w-full ">
+      <Player :file="selectedFile" class="position-sticky top-10px" />
     </div>
   </div>
 </template>
