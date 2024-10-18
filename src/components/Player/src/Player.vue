@@ -5,19 +5,17 @@
 import {onMounted, useTemplateRef, watch} from "vue";
 import Player from 'xgplayer';
 import 'xgplayer/dist/index.min.css';
-
-const props = defineProps<{
-  file: string;
-}>();
+import useCurrentPlayInfo from "../../../store/currentPlayInfo.ts";
 
 const xgplayer = useTemplateRef('vs');
+const currentPlayInfo = useCurrentPlayInfo();
 let player: Player | null = null;
 
 onMounted(() => {
   if (xgplayer.value) {
     player = new Player({
       el: xgplayer.value,
-      url: props.file,
+      url: currentPlayInfo.url,
       playsinline: true,
       fluid: true,
       width: 600,
@@ -27,8 +25,7 @@ onMounted(() => {
     console.error('xgplayer is not ready', xgplayer.value);
   }
 });
-
-watch(() => props.file, (newFile) => {
+watch(() => currentPlayInfo.url, (newFile) => {
   if (player) {
     player.reset();
     console.log('newFile', newFile);

@@ -3,12 +3,15 @@
     <button @click="selectDirectory">选择文件夹</button>
     <button class="ml-18px" @click="selectFile">选择文件</button>
     <ul>
-      <li v-for="(file, index) in files" :key="file.fileName">
-        <button @click="emitFileSelected(file)" :class="file.isDirectory ? '' : 'ml-18px'">
+      <li v-for="(file, index) in files" :key="file.path">
+        <button
+            @click="emitFileSelected(file)"
+            :class="{ 'ml-18px': !file.isDirectory, 'active-style': currentPlayInfo.path!==undefined && currentPlayInfo.path === file.path }"
+        >
 
           <span class="file-name">
             <span v-if="file.isDirectory">📁</span>
-            <span v-else >📄</span>
+            <span v-else>📄</span>
             {{ file.fileName }}
           </span>
           <span v-if="file.duration" class="file-duration">
@@ -21,9 +24,17 @@
 </template>
 <script setup lang="ts">
 import {ref} from 'vue';
+import useCurrentPlayInfo from "../../../store/currentPlayInfo.ts";
 
-const emit = defineEmits(['file-selected']);
-const files = ref<{ fileHandle: FileSystemFileHandle, fileName: string, duration?: number, isDirectory: boolean }[]>([]);
+interface FileItem {
+  fileHandle: FileSystemFileHandle;
+  fileName: string;
+  duration?: number;
+  isDirectory: boolean;
+  path: string;
+}
+
+const files = ref<FileItem[]>([]);
 
 async function selectDirectory() {
   try {
@@ -39,7 +50,7 @@ async function listFilesInDirectory(directoryHandle: FileSystemDirectoryHandle) 
     files.value = [];
     const entries = [];
     for await (const entry of directoryHandle.values()) {
-      entries.push({ entry, path: entry.name });
+      entries.push({entry, path: entry.name});
     }
 
     // 对当前文件夹中的文件和子文件夹按完整路径进行排序
@@ -50,42 +61,49 @@ async function listFilesInDirectory(directoryHandle: FileSystemDirectoryHandle) 
     console.error('Error accessing the directory:', error);
   }
 }
+
 // 自定义排序函数，按自然数顺序排列文件名
 function naturalSort(a: string, b: string) {
-  return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+  return a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'});
 }
 
-async function traverseDirectory(entries: { entry: FileSystemHandle, path: string }[], directoryHandle: FileSystemDirectoryHandle, parentPath: string) {
-  for (const { entry, path } of entries) {
+async function traverseDirectory(entries: {
+  entry: FileSystemHandle,
+  path: string
+}[], directoryHandle: FileSystemDirectoryHandle, parentPath: string) {
+  for (const {entry, path} of entries) {
     if (entry.kind === 'file') {
       const fileHandle = entry;
+      console.log('fileHandle', fileHandle, 'path', path);
       const file = await fileHandle.getFile();
       const fileUrl = URL.createObjectURL(file);
       const duration = await getVideoDuration(fileUrl);
 
       // 只保留文件名，不包含路径
-      files.value.push({ fileHandle, fileName: file.name, duration, isDirectory: false });
+      files.value.push({fileHandle, fileName: file.name, duration, isDirectory: false, path});
     } else if (entry.kind === 'directory') {
       const subDirectoryPath = parentPath ? `${parentPath}/${entry.name}` : `${entry.name}`;
       const subEntries = [];
       for await (const subEntry of entry.values()) {
-        subEntries.push({ entry: subEntry, path: `${subDirectoryPath}/${subEntry.name}` });
+        subEntries.push({entry: subEntry, path: `${subDirectoryPath}/${subEntry.name}`});
       }
 
       // 对子文件夹中的文件和子文件夹按完整路径进行排序
       subEntries.sort((a, b) => naturalSort(a.path, b.path));
 
-      files.value.push({ fileHandle: entry, fileName: subDirectoryPath, isDirectory: true });
+      files.value.push({fileHandle: entry, fileName: subDirectoryPath, isDirectory: true});
       await traverseDirectory(subEntries, entry, subDirectoryPath);
     }
   }
 }
 
-async function emitFileSelected(fileItem: { fileHandle: FileSystemFileHandle, fileName: string, duration?: number, isDirectory: boolean }) {
+const currentPlayInfo = useCurrentPlayInfo();
+
+async function emitFileSelected(fileItem: FileItem) {
   try {
     const fileData = await fileItem.fileHandle.getFile();
-    const fileUrl = URL.createObjectURL(fileData);
-    emit('file-selected', fileUrl);
+    currentPlayInfo.url = URL.createObjectURL(fileData);
+    currentPlayInfo.path = fileItem.path;
   } catch (error) {
     console.error('Error reading file:', error);
   }
@@ -117,7 +135,7 @@ async function selectFile() {
     const fileUrl = URL.createObjectURL(file);
     const duration = await getVideoDuration(fileUrl);
 
-    files.value.push({ fileHandle, fileName: file.name, duration, isDirectory: false });
+    files.value.push({fileHandle, fileName: file.name, duration, isDirectory: false});
   } catch (error) {
     console.error('Error selecting file:', error);
   }
@@ -156,6 +174,11 @@ li {
     text-align: right;
     flex-shrink: 0;
     padding-left: 10px;
+  }
+
+  .active-style {
+    background-color: rgba(100, 108, 255, 0.28);
+    color: black;
   }
 }
 </style>
