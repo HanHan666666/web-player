@@ -1,7 +1,9 @@
 <template>
   <div>
+    <div class="mb-10px" v-if="files.length === 0">👇请点击上方按钮选择视频目录或者单个视频</div>
     <button @click="selectDirectory">选择文件夹</button>
     <button class="ml-18px" @click="selectFile">选择文件</button>
+    <div class="mt-10px" v-if="!currentPlayInfo.path &&files.length > 0">👇请在下方选择要播放的视频</div>
     <ul>
       <li v-for="(file, index) in files" :key="file.path" class="flex justify-end">
         <button
@@ -180,6 +182,7 @@ li {
     background-color: rgba(100, 108, 255, 0.28);
     color: black;
   }
+
   .max-width-95 {
     max-width: 95%;
   }
