@@ -4,7 +4,7 @@
 <script setup lang="ts">
 import {onMounted, useTemplateRef, watch} from "vue";
 import Player from 'xgplayer';
-import 'xgplayer/dist/xgplayer.css';
+import 'xgplayer/dist/index.min.css';
 
 const props = defineProps<{
   file: string;
