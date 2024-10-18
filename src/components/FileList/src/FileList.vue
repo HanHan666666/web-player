@@ -139,9 +139,8 @@ async function selectFile() {
     const fileUrl = URL.createObjectURL(file);
     const duration = await getVideoDuration(fileUrl);
 
-    // files.value.push({fileHandle, fileName: file.name, duration, isDirectory: false});
     const singleFile = {fileHandle, fileName: file.name, duration, isDirectory: false, path: file.name};
-    files.value = [singleFile];
+    files.value.push(singleFile);
     emitFileSelected(singleFile);
   } catch (error) {
     console.error('Error selecting file:', error);
