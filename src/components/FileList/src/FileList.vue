@@ -1,14 +1,14 @@
 <template>
   <div>
-    <div class="mb-10px" v-if="files.length === 0">👇请点击上方按钮选择视频目录或者单个视频</div>
+    <div class="mb-10px" v-if="files.length === 0">👇请点击下方按钮选择视频目录或者单个视频</div>
     <button @click="selectDirectory">选择文件夹</button>
     <button class="ml-18px" @click="selectFile">选择文件</button>
-    <div class="mt-10px" v-if="!currentPlayInfo.path &&files.length > 0">👇请在下方选择要播放的视频</div>
+    <div class="mt-10px" v-if="!currentPlayInfo.path &&files.length > 0 ">👇请在下方选择要播放的视频</div>
     <ul>
       <li v-for="(file, index) in files" :key="file.path" class="flex justify-end">
         <button
             @click="emitFileSelected(file)"
-            :class="{ 'max-width-95': !file.isDirectory, 'active-style': currentPlayInfo.path!==undefined && currentPlayInfo.path === file.path }"
+            :class="{ 'max-width-95': !file.isDirectory && files.length!==1&& hasDirectory, 'active-style': currentPlayInfo.path!==undefined && currentPlayInfo.path === file.path }"
         >
 
           <span class="file-name" :title="file.fileName">
@@ -37,7 +37,8 @@ interface FileItem {
 }
 
 const files = ref<FileItem[]>([]);
-
+// 是否存在任何一个文件夹
+const hasDirectory = ref(false);
 async function selectDirectory() {
   try {
     const directoryHandle = await window.showDirectoryPicker();
@@ -94,6 +95,7 @@ async function traverseDirectory(entries: {
       subEntries.sort((a, b) => naturalSort(a.path, b.path));
 
       files.value.push({fileHandle: entry, fileName: subDirectoryPath, isDirectory: true});
+      hasDirectory.value = true;
       await traverseDirectory(subEntries, entry, subDirectoryPath);
     }
   }
@@ -137,7 +139,10 @@ async function selectFile() {
     const fileUrl = URL.createObjectURL(file);
     const duration = await getVideoDuration(fileUrl);
 
-    files.value.push({fileHandle, fileName: file.name, duration, isDirectory: false});
+    // files.value.push({fileHandle, fileName: file.name, duration, isDirectory: false});
+    const singleFile = {fileHandle, fileName: file.name, duration, isDirectory: false, path: file.name};
+    files.value = [singleFile];
+    emitFileSelected(singleFile);
   } catch (error) {
     console.error('Error selecting file:', error);
   }
