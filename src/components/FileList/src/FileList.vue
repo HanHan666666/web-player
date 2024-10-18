@@ -3,13 +3,13 @@
     <button @click="selectDirectory">选择文件夹</button>
     <button class="ml-18px" @click="selectFile">选择文件</button>
     <ul>
-      <li v-for="(file, index) in files" :key="file.path">
+      <li v-for="(file, index) in files" :key="file.path" class="flex justify-end">
         <button
             @click="emitFileSelected(file)"
-            :class="{ 'ml-18px': !file.isDirectory, 'active-style': currentPlayInfo.path!==undefined && currentPlayInfo.path === file.path }"
+            :class="{ 'max-width-95': !file.isDirectory, 'active-style': currentPlayInfo.path!==undefined && currentPlayInfo.path === file.path }"
         >
 
-          <span class="file-name">
+          <span class="file-name" :title="file.fileName">
             <span v-if="file.isDirectory">📁</span>
             <span v-else>📄</span>
             {{ file.fileName }}
@@ -179,6 +179,9 @@ li {
   .active-style {
     background-color: rgba(100, 108, 255, 0.28);
     color: black;
+  }
+  .max-width-95 {
+    max-width: 95%;
   }
 }
 </style>
