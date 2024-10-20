@@ -3,13 +3,15 @@
     <div class="mb-10px" v-if="files.length === 0">👇请点击下方按钮选择视频目录或者单个视频</div>
     <button @click="selectDirectory">选择文件夹</button>
     <button class="ml-18px" @click="selectFile">选择文件</button>
-    <div class="mt-10px" v-if="!currentPlayInfo.path &&files.length > 0 ">👇请在下方选择要播放的视频</div>
+    <div class="mt-10px" v-if="!currentPlayInfo.fileItem.path &&files.length > 0 ">👇请在下方选择要播放的视频</div>
     <ul>
       <li v-for="(file, index) in files" :key="file.path" class="flex justify-end" v-show="file.isDirectory || file.isVisible.value">
         <button
             @click="emitFileSelected(file)"
             :class="{ 'max-width-95': !file.isDirectory && files.length!==1&& hasDirectory,
-            'active-style': currentPlayInfo.path!==undefined && currentPlayInfo.path === file.path }"
+            'active-style': currentPlayInfo.fileItem.path!==undefined && currentPlayInfo.fileItem.path === file.path,
+            'playing-style': playingVideoPath!==undefined&& playingVideoPath === file.path && file.isDirectory
+            }"
         >
 
           <span class="file-name" :title="file.fileName">
@@ -27,15 +29,7 @@
 <script setup lang="ts">
 import {Ref, ref} from 'vue';
 import useCurrentPlayInfo from "../../../store/currentPlayInfo.ts";
-
-interface FileItem {
-  fileHandle: FileSystemFileHandle;
-  fileName: string;
-  duration?: number;
-  isDirectory: boolean;
-  isVisible: {value: boolean};
-  path: string;
-}
+import {FileItem} from "../../../types/fileInfo.ts";
 
 const files = ref<FileItem[]>([]);
 // 是否存在任何一个文件夹
@@ -105,7 +99,7 @@ async function traverseDirectory(entries: {
       // 对子文件夹中的文件和子文件夹按完整路径进行排序
       subEntries.sort((a, b) => naturalSort(a.path, b.path));
 
-      files.value.push({fileHandle: entry, fileName: subDirectoryPath, isDirectory: true, isVisible});
+      files.value.push({fileHandle: entry, fileName: subDirectoryPath, isDirectory: true, isVisible,path: subDirectoryPath});
       hasDirectory.value = true;
       await traverseDirectory(subEntries, entry, subDirectoryPath, isVisible);
     }
@@ -122,8 +116,10 @@ async function emitFileSelected(fileItem: FileItem) {
       return;
     }
     const fileData = await fileItem.fileHandle.getFile();
+    playingVideoPath.value = fileItem.path;
+    console.log('emitFileSelected fileItem', fileItem);
     currentPlayInfo.url = URL.createObjectURL(fileData);
-    currentPlayInfo.path = fileItem.path;
+    currentPlayInfo.setFileItem(fileItem);
   } catch (error) {
     console.error('Error reading file:', error);
   }
@@ -200,6 +196,10 @@ li {
 
   .active-style {
     background-color: rgba(100, 108, 255, 0.28);
+    color: black;
+  }
+  .playing-style {
+    border-color: #646cff;
     color: black;
   }
 
