@@ -27,7 +27,7 @@
 </template>
 <script setup lang="ts">
 import {ref} from 'vue';
-import useCurrentPlayInfo from "../../../store/currentPlayInfo.ts";
+import useCurrentPlayInfo from "@/store/currentPlayInfo.ts";
 import {FileItem} from "../index.ts";
 const currentPlayInfo = useCurrentPlayInfo();
 
