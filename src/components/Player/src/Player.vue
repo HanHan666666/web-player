@@ -3,7 +3,7 @@
 </template>
 <script setup lang="ts">
 import {onMounted, useTemplateRef, watch} from "vue";
-import Player from 'xgplayer';
+import Player, {Events} from 'xgplayer';
 import 'xgplayer/dist/index.min.css';
 import useCurrentPlayInfo from "../../../store/currentPlayInfo.ts";
 
@@ -21,6 +21,9 @@ onMounted(() => {
       width: 600,
       height: 350,
     });
+    player.on(Events.ENDED, () => {
+      currentPlayInfo.next()
+    })
   } else {
     console.error('xgplayer is not ready', xgplayer.value);
   }
