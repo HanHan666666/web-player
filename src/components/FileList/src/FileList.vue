@@ -27,7 +27,7 @@
 </template>
 <script setup lang="ts">
 import {ref} from 'vue';
-import useCurrentPlayInfo from "@/store/currentPlayInfo.ts";
+import useCurrentPlayInfo from "../../../store/currentPlayInfo.ts";
 import {FileItem} from "../index.ts";
 const currentPlayInfo = useCurrentPlayInfo();
 
@@ -50,6 +50,7 @@ async function listFilesInDirectory(directoryHandle: FileSystemDirectoryHandle) 
     for await (const entry of directoryHandle.values()) {
       entries.push({entry, path: entry.name});
     }
+    console.log('entries', entries);
 
     // 对当前文件夹中的文件和子文件夹按完整路径进行排序
     entries.sort((a, b) => naturalSort(a.path, b.path));
