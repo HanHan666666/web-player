@@ -27,8 +27,8 @@
 </template>
 <script setup lang="ts">
 import {ref} from 'vue';
-import useCurrentPlayInfo from "../../../store/currentPlayInfo.ts";
-import {FileItem} from "../index.ts";
+import useCurrentPlayInfo from "../../../store/currentPlayInfo";
+import {FileItem} from "../index";
 const currentPlayInfo = useCurrentPlayInfo();
 
 // 是否存在任何一个文件夹
@@ -157,7 +157,7 @@ async function selectFile() {
       isVisible: {value: true}
     };
     currentPlayInfo.playList.push(singleFile);
-    emitFileSelected(singleFile);
+    await emitFileSelected(singleFile);
   } catch (error) {
     console.error('Error selecting file:', error);
   }
