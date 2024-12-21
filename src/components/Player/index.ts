@@ -1,3 +1,9 @@
 import Player from './src/Player.vue';
 
-export { Player };
+/**
+ * 支持的格式
+ */
+export const VideoSupportList = ['mp4', 'mov', 'mp3', 'mp4a'];
+
+
+export {Player};
