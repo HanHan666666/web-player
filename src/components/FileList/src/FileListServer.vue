@@ -29,9 +29,9 @@ import {onMounted, ref} from 'vue';
 import useCurrentPlayInfo from "../../../store/currentPlayInfo";
 import {FileSimpleItem} from "../index";
 import {FILE_PREFIX, getFile, GetFileList} from "@/api/fileList";
+import {VideoSupportList} from "@/components/Player";
 
 const currentPlayInfo = useCurrentPlayInfo();
-const videoTypeList = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'wmv', 'flv']
 // 是否存在任何一个文件夹
 const hasDirectory = ref(false);
 
@@ -71,7 +71,7 @@ async function emitFileSelected(fileItem: FileSimpleItem) {
 
     let isVideo = false;
     // 判断是否是视频文件
-    videoTypeList.forEach((type) => {
+    VideoSupportList.forEach((type) => {
       if (fileItem.fileName.endsWith(type)) {
         console.log("video: ", fileItem);
         isVideo = true;

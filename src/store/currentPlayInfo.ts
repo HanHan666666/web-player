@@ -16,13 +16,17 @@ const useCurrentPlayInfo = defineStore('currentPlayInfo', () => {
         }
         let nextIndex = (index + 1) % playList.value.length;
         while (true) {
+            let fileName = playList.value[nextIndex].fileName
             // 获取文件后缀
-            const fileSuffix = playList.value[nextIndex].fileName.split('.').pop() || "";
+            const fileSuffix = fileName.split('.').pop() || "";
             // 如果下一个文件不是视频，就再寻找下一个
             if (!VideoSupportList.includes(fileSuffix)) {
                 nextIndex = (nextIndex + 1) % playList.value.length;
                 console.log('playList.value[nextIndex]', playList.value[nextIndex])
             } else {
+                if (fileName){
+                    document.title = fileName;
+                }
                 // 找到之后就结束循环
                 path.value = playList.value[nextIndex].path;
                 const fileData = await playList.value[nextIndex]?.fileHandle.getFile();
