@@ -3,7 +3,10 @@
     <div class="mb-10px" v-if="currentPlayInfo.playList.length === 0">👇请点击下方按钮选择视频目录或者单个视频</div>
     <button @click="selectDirectory">选择文件夹</button>
     <button class="ml-18px" @click="selectFile">选择文件</button>
-    <div class="mt-10px" v-if="!currentPlayInfo.path &&currentPlayInfo.playList.length > 0 ">👇请在下方选择要播放的视频</div>
+    <span v-if="directoryHandleRef!=null" class="ml-15px cursor-pointer" title="重新读取文件夹"
+          @click="refreshDirectory">↻</span>
+    <div class="mt-10px" v-if="!currentPlayInfo.path &&currentPlayInfo.playList.length > 0 ">👇请在下方选择要播放的视频
+    </div>
     <ul>
       <li v-for="(file) in currentPlayInfo.playList" :key="file.path" class="flex justify-end"
           v-show="file.isDirectory || file.isVisible.value">
@@ -29,15 +32,30 @@
 import {ref} from 'vue';
 import useCurrentPlayInfo from "../../../store/currentPlayInfo";
 import {FileItem} from "../index";
+
 const currentPlayInfo = useCurrentPlayInfo();
 
 // 是否存在任何一个文件夹
 const hasDirectory = ref(false);
 
+let directoryHandleRef = ref(null)
+
+function refreshDirectory() {
+  try {
+    listFilesInDirectory(directoryHandleRef.value!);
+  } catch (error) {
+    console.log(error)
+    alert("请重新选择文件夹")
+  }
+}
+
+
 async function selectDirectory() {
   try {
+    // @ts-ignore 实验特性
     const directoryHandle = await window.showDirectoryPicker();
-    await listFilesInDirectory(directoryHandle);
+    directoryHandleRef.value = directoryHandle
+    await listFilesInDirectory(directoryHandle!);
   } catch (error) {
     console.error('Error selecting directory:', error);
   }
@@ -109,7 +127,7 @@ async function traverseDirectory(entries: {
 
 async function emitFileSelected(fileItem: FileItem) {
   // console.log('emitFileSelected fileItem', fileItem);
-  if (fileItem.fileName){
+  if (fileItem.fileName) {
     document.title = fileItem.fileName;
   }
   try {
@@ -151,7 +169,7 @@ async function selectFile() {
     const file = await fileHandle.getFile();
     const fileUrl = URL.createObjectURL(file);
     const duration = await getVideoDuration(fileUrl);
-    
+
     const singleFile = {
       fileHandle,
       fileName: file.name,
