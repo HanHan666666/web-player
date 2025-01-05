@@ -17,32 +17,31 @@ const useCurrentPlayInfo = defineStore('currentPlayInfo', () => {
         }
         let nextIndex = (index + 1) % playList.value.length;
         while (true) {
-            currentVideo.value = playList.value[nextIndex]
-            let fileName = currentVideo.value.fileName
+            let tempVideoInfo = playList.value[nextIndex]
+            let fileName = tempVideoInfo.fileName
             // 获取文件后缀
             const fileSuffix = fileName.split('.').pop() || "";
             // 如果下一个文件不是视频，就再寻找下一个
             if (!VideoSupportList.includes(fileSuffix)) {
                 nextIndex = (nextIndex + 1) % playList.value.length;
             } else {
-                if (fileName) {
-                    document.title = fileName;
-                }
-                // 找到之后就结束循环
-                path.value = playList.value[nextIndex].path;
-                const fileData = await playList.value[nextIndex]?.fileHandle.getFile();
-                url.value = URL.createObjectURL(fileData);
+                currentVideo.value = tempVideoInfo
+                await setCurrentVideo(tempVideoInfo)
                 break;
             }
         }
     }
 
-    function setCurrentVideo(fileItem: FileItem) {
+    async function setCurrentVideo(fileItem: FileItem) {
         currentVideo.value = fileItem
         console.log('setCurrentVideo fileItem', fileItem);
         if (fileItem.fileName) {
             document.title = fileItem.fileName;
         }
+        // 找到之后就结束循环
+        path.value = fileItem.path;
+        const fileData = await fileItem?.fileHandle.getFile();
+        url.value = URL.createObjectURL(fileData);
     }
 
     return {
