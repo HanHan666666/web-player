@@ -1,11 +1,14 @@
 <template>
-  <div ref="vs"></div>
+  <div>
+    <div ref="vs"></div>
+    <span class="text-xl pt-20px">{{ currentPlayInfo.currentVideo?.fileName }}</span>
+  </div>
 </template>
 <script setup lang="ts">
 import {onMounted, useTemplateRef, watch} from "vue";
 import Player, {Events} from 'xgplayer';
 import 'xgplayer/dist/index.min.css';
-import useCurrentPlayInfo from "../../../store/currentPlayInfo.ts";
+import useCurrentPlayInfo from "../../../store/currentPlayInfo";
 
 const xgplayer = useTemplateRef('vs');
 const currentPlayInfo = useCurrentPlayInfo();

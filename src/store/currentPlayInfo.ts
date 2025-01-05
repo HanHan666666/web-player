@@ -7,6 +7,7 @@ const useCurrentPlayInfo = defineStore('currentPlayInfo', () => {
     const url = ref<string>();
     const path = ref<string | undefined>();
     const playList = ref<FileItem[]>([]);
+    const currentVideo = ref<FileItem>()
 
     // 下一个视频
     async function next() {
@@ -16,15 +17,15 @@ const useCurrentPlayInfo = defineStore('currentPlayInfo', () => {
         }
         let nextIndex = (index + 1) % playList.value.length;
         while (true) {
-            let fileName = playList.value[nextIndex].fileName
+            currentVideo.value = playList.value[nextIndex]
+            let fileName = currentVideo.value.fileName
             // 获取文件后缀
             const fileSuffix = fileName.split('.').pop() || "";
             // 如果下一个文件不是视频，就再寻找下一个
             if (!VideoSupportList.includes(fileSuffix)) {
                 nextIndex = (nextIndex + 1) % playList.value.length;
-                console.log('playList.value[nextIndex]', playList.value[nextIndex])
             } else {
-                if (fileName){
+                if (fileName) {
                     document.title = fileName;
                 }
                 // 找到之后就结束循环
@@ -36,10 +37,20 @@ const useCurrentPlayInfo = defineStore('currentPlayInfo', () => {
         }
     }
 
+    function setCurrentVideo(fileItem: FileItem) {
+        currentVideo.value = fileItem
+        console.log('setCurrentVideo fileItem', fileItem);
+        if (fileItem.fileName) {
+            document.title = fileItem.fileName;
+        }
+    }
+
     return {
         url,
         path,
         playList,
+        setCurrentVideo,
+        currentVideo,
         next
     }
 })

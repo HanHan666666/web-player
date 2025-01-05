@@ -129,16 +129,14 @@ async function traverseDirectory(entries: {
 
 
 async function emitFileSelected(fileItem: FileItem) {
-  // console.log('emitFileSelected fileItem', fileItem);
-  if (fileItem.fileName) {
-    document.title = fileItem.fileName;
-  }
+  // console.log("emitFileSelected fileInfoStatic",fileItem)
   try {
     // 如果是文件夹，则执行收起操作
     if (fileItem.isDirectory) {
       fileItem.isVisible.value = !fileItem.isVisible.value;
       return;
     }
+    currentPlayInfo.setCurrentVideo(fileItem)
     const fileData = await fileItem.fileHandle.getFile();
     currentPlayInfo.url = URL.createObjectURL(fileData);
     currentPlayInfo.path = fileItem.path;
