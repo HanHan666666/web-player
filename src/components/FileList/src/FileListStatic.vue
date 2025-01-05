@@ -33,13 +33,16 @@ import {ref} from 'vue';
 import useCurrentPlayInfo from "../../../store/currentPlayInfo";
 import {FileItem} from "../index";
 
+// 获取当前播放信息
 const currentPlayInfo = useCurrentPlayInfo();
 
 // 是否存在任何一个文件夹
 const hasDirectory = ref(false);
 
+// 文件列表
 let directoryHandleRef = ref(null)
 
+// 刷新文件夹
 function refreshDirectory() {
   try {
     listFilesInDirectory(directoryHandleRef.value!);
@@ -49,7 +52,7 @@ function refreshDirectory() {
   }
 }
 
-
+// 选择文件夹
 async function selectDirectory() {
   try {
     // @ts-ignore 实验特性
@@ -92,7 +95,7 @@ async function traverseDirectory(entries: {
   for (const {entry, path} of entries) {
     if (entry.kind === 'file') {
       const fileHandle = entry;
-      console.log('fileHandle', fileHandle, 'path', path);
+      // console.log('fileHandle', fileHandle, 'path', path);
       const file = await fileHandle.getFile();
       const fileUrl = URL.createObjectURL(file);
       const duration = await getVideoDuration(fileUrl);
@@ -165,6 +168,7 @@ function formatDuration(duration: number): string {
 
 async function selectFile() {
   try {
+    // @ts-ignore 实验特性
     const [fileHandle] = await window.showOpenFilePicker();
     const file = await fileHandle.getFile();
     const fileUrl = URL.createObjectURL(file);
