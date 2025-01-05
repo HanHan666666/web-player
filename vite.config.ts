@@ -1,5 +1,5 @@
 import {defineConfig} from 'vite'
-import {resolve} from 'path'
+import {join, resolve} from 'path'
 import vue from '@vitejs/plugin-vue'
 import UnoCSS from 'unocss/vite'
 import Icons from "unplugin-icons/vite";
@@ -10,6 +10,7 @@ const root = process.cwd()
 function pathResolve(dir: string) {
     return resolve(root, '.', dir)
 }
+
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
@@ -20,10 +21,22 @@ export default defineConfig({
             autoInstall: true
         })
     ],
-    resolve: {
-        alias: {
-            find: /@\//,
-            replacement: `${pathResolve('src')}/`
+    server: {
+        proxy: {
+            '^/file': {
+                target: 'http://localhost:8080',
+                changeOrigin: true,
+                ws: true
+            },
         }
     },
+    resolve: {
+        alias: {
+            '@': join(__dirname, "src"),
+        }
+    },
+    esbuild: {
+        pure: ['console.log'], // 删除 console.log
+        drop: ['debugger'], // 删除 debugger
+    }
 })
