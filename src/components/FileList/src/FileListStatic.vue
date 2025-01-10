@@ -7,7 +7,7 @@
           @click="refreshDirectory">↻</span>
     <div class="mt-10px" v-if="!currentPlayInfo.path &&currentPlayInfo.playList.length > 0 ">👇请在下方选择要播放的视频
     </div>
-    <ul>
+    <ul class="overflow-y-auto h-87vh" style="padding-right: 5px">
       <li v-for="(file) in currentPlayInfo.playList" :key="file.path" class="flex justify-end"
           v-show="file.isDirectory || file.isVisible.value">
         <button
