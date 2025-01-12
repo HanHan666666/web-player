@@ -161,7 +161,7 @@ async function getVideoDuration(fileUrl: string): Promise<number | undefined> {
 function formatDuration(seconds: number): string {
   const hours = Math.floor(seconds / 3600); // 计算小时
   const minutes = Math.floor((seconds % 3600) / 60); // 计算分钟
-  const secs = Math.floor(seconds % 60); // 计算秒数
+  const secs = Math.round(seconds % 60); // 计算秒数
 
   // 使用 padStart 确保两位数格式
   const formattedHours = String(hours).padStart(2, '0');
