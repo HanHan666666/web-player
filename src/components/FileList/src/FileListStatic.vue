@@ -40,7 +40,7 @@ const currentPlayInfo = useCurrentPlayInfo();
 const hasDirectory = ref(false);
 
 // 文件列表
-let directoryHandleRef = ref(null)
+let directoryHandleRef = ref()
 
 // 刷新文件夹
 function refreshDirectory() {
@@ -55,10 +55,9 @@ function refreshDirectory() {
 // 选择文件夹
 async function selectDirectory() {
   try {
-    // @ts-ignore 实验特性
     const directoryHandle = await window.showDirectoryPicker();
     directoryHandleRef.value = directoryHandle
-    await listFilesInDirectory(directoryHandle!);
+    await listFilesInDirectory(directoryHandle);
   } catch (error) {
     console.error('Error selecting directory:', error);
   }
@@ -67,31 +66,43 @@ async function selectDirectory() {
 async function listFilesInDirectory(directoryHandle: FileSystemDirectoryHandle) {
   try {
     currentPlayInfo.playList = [];
-    const entries = [];
+    let entries: { entry: FileSystemHandle; path: string }[] = [];
+    console.log('directoryHandle', directoryHandle);
+    console.log('directoryHandle.values()', directoryHandle.values());
+    // 顶级目录文件夹靠前，文件靠后
     for await (const entry of directoryHandle.values()) {
-      entries.push({entry, path: entry.name});
+      if (entry.kind === 'directory') {
+        entries.push({entry, path: entry.name});
+      }
+    }
+    for await (const entry of directoryHandle.values()) {
+      if (entry.kind === 'file') {
+        entries.push({entry, path: entry.name});
+      }
     }
     console.log('entries', entries);
 
     // 对当前文件夹中的文件和子文件夹按完整路径进行排序
-    entries.sort((a, b) => naturalSort(a.path, b.path));
+    // entries.sort((a, b) => naturalSort(a.path, b.path));
 
-    await traverseDirectory(entries, directoryHandle, '');
+    await traverseDirectory(entries, '');
     console.log('files', currentPlayInfo.playList);
   } catch (error) {
     console.error('Error accessing the directory:', error);
   }
 }
 
-// 自定义排序函数，按自然数顺序排列文件名
-function naturalSort(a: string, b: string) {
-  return a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'});
-}
+// // 自定义排序函数，按自然数顺序排列文件名
+// function naturalSort(a: string, b: string) {
+//   return a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'});
+// }
 
-async function traverseDirectory(entries: {
-  entry: FileSystemHandle,
-  path: string
-}[], directoryHandle: FileSystemDirectoryHandle, parentPath: string, isVisible?: { value: boolean } = {value: true}) {
+async function traverseDirectory(
+    entries: { entry: FileSystemHandle, path: string }[],
+    // directoryHandle: FileSystemDirectoryHandle,
+    parentPath: string,
+    isVisible: { value: boolean } = {value: true}
+) {
   for (const {entry, path} of entries) {
     if (entry.kind === 'file') {
       const fileHandle = entry;
@@ -112,17 +123,17 @@ async function traverseDirectory(entries: {
     } else if (entry.kind === 'directory') {
       const isVisible = {value: false};
       const subDirectoryPath = parentPath ? `${parentPath}/${entry.name}` : `${entry.name}`;
-      const subEntries = [];
+      const subEntries: { entry: FileSystemHandle; path: string }[] = [];
       for await (const subEntry of entry.values()) {
         subEntries.push({entry: subEntry, path: `${subDirectoryPath}/${subEntry.name}`});
       }
 
       // 对子文件夹中的文件和子文件夹按完整路径进行排序
-      subEntries.sort((a, b) => naturalSort(a.path, b.path));
+      // subEntries.sort((a, b) => naturalSort(a.path, b.path));
 
       currentPlayInfo.playList.push({fileHandle: entry, fileName: subDirectoryPath, isDirectory: true, isVisible});
       hasDirectory.value = true;
-      await traverseDirectory(subEntries, entry, subDirectoryPath, isVisible);
+      await traverseDirectory(subEntries, subDirectoryPath, isVisible);
     }
   }
 }
