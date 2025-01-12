@@ -158,10 +158,22 @@ async function getVideoDuration(fileUrl: string): Promise<number | undefined> {
   });
 }
 
-function formatDuration(duration: number): string {
-  const minutes = Math.floor(duration / 60);
-  const seconds = Math.floor(duration % 60);
-  return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+function formatDuration(seconds: number): string {
+  const hours = Math.floor(seconds / 3600); // 计算小时
+  const minutes = Math.floor((seconds % 3600) / 60); // 计算分钟
+  const secs = Math.floor(seconds % 60); // 计算秒数
+
+  // 使用 padStart 确保两位数格式
+  const formattedHours = String(hours).padStart(2, '0');
+  const formattedMinutes = String(minutes).padStart(2, '0');
+  const formattedSeconds = String(secs).padStart(2, '0');
+
+  // return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+  if (hours > 0) {
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+  } else {
+    return `${formattedMinutes}:${formattedSeconds}`;
+  }
 }
 
 async function selectFile() {
