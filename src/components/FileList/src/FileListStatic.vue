@@ -12,8 +12,10 @@
           v-show="file.isDirectory || file.isVisible.value">
         <button
             @click="emitFileSelected(file)"
-            :class="{ 'max-width-95': !file.isDirectory && currentPlayInfo.playList.length!==1&& hasDirectory,
-            'active-style': currentPlayInfo.path!==undefined && currentPlayInfo.path === file.path }"
+            :class="{
+              'max-width-95': !file.isDirectory && currentPlayInfo.playList.length!==1 && hasDirectory && file.path !== '.',
+              'active-style': currentPlayInfo.path!==undefined && currentPlayInfo.path === file.path
+            }"
         >
 
           <span class="file-name" :title="file.fileName">
@@ -72,12 +74,12 @@ async function listFilesInDirectory(directoryHandle: FileSystemDirectoryHandle) 
     // 顶级目录文件夹靠前，文件靠后
     for await (const entry of directoryHandle.values()) {
       if (entry.kind === 'directory') {
-        entries.push({entry, path: entry.name});
+        entries.push({entry, path: '.'});
       }
     }
     for await (const entry of directoryHandle.values()) {
       if (entry.kind === 'file') {
-        entries.push({entry, path: entry.name});
+        entries.push({entry, path: '.'});
       }
     }
     console.log('entries', entries);

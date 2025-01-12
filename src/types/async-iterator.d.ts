@@ -3,8 +3,8 @@
 /////////////////////////////
 
 interface FileSystemDirectoryHandle {
-    [Symbol.asyncIterator](): AsyncIterableIterator<[string, FileSystemDirectoryHandle]>;
-    entries(): AsyncIterableIterator<[string, FileSystemDirectoryHandle]>;
+    [Symbol.asyncIterator](): AsyncIterableIterator<[string, FileSystemHandle]>;
+    entries(): AsyncIterableIterator<[string, FileSystemHandle]>;
     keys(): AsyncIterableIterator<string>;
-    values(): AsyncIterableIterator<FileSystemDirectoryHandle>;
+    values(): AsyncIterableIterator<FileSystemHandle>;
 }
