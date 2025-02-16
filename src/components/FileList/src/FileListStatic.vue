@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="mb-10px" v-if="currentPlayInfo.playList.length === 0">👇请点击下方按钮选择视频目录或者单个视频</div>
-    <button @click="selectDirectory">选择文件夹</button>
-    <button class="ml-18px" @click="selectFile">选择文件</button>
+    <button class="mr-18px" @click="selectDirectory">选择文件夹</button>
+    <button class="mt-10px" @click="selectFile">选择文件</button>
     <span v-if="directoryHandleRef!=null" class="ml-15px cursor-pointer" title="重新读取文件夹"
           @click="refreshDirectory">↻</span>
     <div class="mt-10px" v-if="!currentPlayInfo.path &&currentPlayInfo.playList.length > 0 ">👇请在下方选择要播放的视频
