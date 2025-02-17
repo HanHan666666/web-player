@@ -1,6 +1,9 @@
 <template>
-  <div ref="vs"></div>
-  <img src="@/assets/fast.svg" alt="fast" />
+  <div>
+    <div ref="vs"></div>
+    <img src="@/assets/fast.svg" alt="fast" />
+    <span class="text-xl pt-20px">{{ currentPlayInfo.currentVideo?.fileName }}</span>
+  </div>
 </template>
 <script setup lang="ts">
 import { onMounted, useTemplateRef, watch } from "vue";
