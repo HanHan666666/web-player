@@ -2,7 +2,7 @@ import { Plugin } from 'xgplayer'
 const { POSITIONS } = Plugin
 import backSvg from '@/assets/back.svg';
 export default class FastPlugin extends Plugin  {
-  
+
   /**
    * （必须声明）插件的名称，将作为插件实例的唯一key值
    * 该参数还最为播放器上该插件的配置透传key值，例如：
@@ -46,7 +46,7 @@ export default class FastPlugin extends Plugin  {
     // 播放器销毁的时候一些逻辑
   }
 
-  render () { 
+  render () {
     return `
       <xg-icon class="xgplayer-back" data-index="1">
         <div class="xgplayer-icon">
@@ -57,12 +57,12 @@ export default class FastPlugin extends Plugin  {
   }
 
   /**
-   * 处理快进按钮点击事件
+   * 处理后退按钮点击事件
    */
   handleBackClick = () =>  {
     // 获取当前播放时间
     const currentTime = this.player.currentTime;
-    // 快进10秒
+    // 后退10秒
     this.player.seek(currentTime - 10);
   }
 }
