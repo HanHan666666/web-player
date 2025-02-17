@@ -15,9 +15,13 @@
 ```shell
 pnpm install
 ```
-本地运行
+本地静态模式运行
 ```shell
-pnpm run dev
+pnpm run dev:static
+```
+本地服务端模式运行
+```shell
+pnpm run dev:server
 ```
 静态网站模式打包
 ```shell

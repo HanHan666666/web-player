@@ -1,14 +1,17 @@
 <template>
   <div>
     <div ref="vs"></div>
+    <img src="@/assets/fast.svg" alt="fast" />
     <span class="text-xl pt-20px">{{ currentPlayInfo.currentVideo?.fileName }}</span>
   </div>
 </template>
 <script setup lang="ts">
-import {onMounted, useTemplateRef, watch} from "vue";
-import Player, {Events} from 'xgplayer';
+import { onMounted, useTemplateRef, watch } from "vue";
+import Player, { Events } from 'xgplayer';
+import FastPlugin from '@/components/Player/components/fastPlugin'
+import BackPlugin from '@/components/Player/components/backPlugin'
 import 'xgplayer/dist/index.min.css';
-import useCurrentPlayInfo from "../../../store/currentPlayInfo";
+import useCurrentPlayInfo from "@/store/currentPlayInfo";
 
 const xgplayer = useTemplateRef('vs');
 const currentPlayInfo = useCurrentPlayInfo();
@@ -24,6 +27,7 @@ onMounted(() => {
       fluid: true,
       width: 600,
       height: 350,
+      plugins: [FastPlugin, BackPlugin]
     });
     player.on(Events.ENDED, () => {
       currentPlayInfo.next()
@@ -42,8 +46,7 @@ watch(() => currentPlayInfo.url, (newFile) => {
     player.play();
   }
 });
+
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
