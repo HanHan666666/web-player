@@ -251,6 +251,11 @@ li {
     background-color: rgba(100, 108, 255, 0.28);
     color: black;
   }
+  @media (prefers-color-scheme: dark){
+    .active-style {
+      color: white;
+    }
+  }
 
   .max-width-95 {
     max-width: 95%;
