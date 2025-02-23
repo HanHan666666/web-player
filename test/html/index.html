@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>实现各级标题自动编号</title>
+</head>
+<style>
+    #write {
+        counter-reset: h1;
+    }
+    #write h1{
+        counter-reset: h2;
+    }
+    #write h1::before{
+        counter-increment: h1;
+        content: counter(h1) " ";
+    }
+    #write h2::before {
+        counter-increment: h2;
+        content: counter(h1) "." counter(h2) " ";
+    }
+</style>
+<body>
+<div id='write'>
+    <h1>实现效果</h1>
+    <h1>实现思路</h1>
+    <h1>应用实例</h1>
+    <h2>Typora</h2>
+    <h2>WordPress Sakurairo主题</h2>
+</div>
+
+<p><b>注意:</b> IE8 需要指定 !DOCTYPE 才可以支持该属性。</p>
+
+</body>
+</html>

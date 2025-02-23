@@ -13,18 +13,17 @@
         <button
             @click="emitFileSelected(file)"
             :class="{
-              'max-width-95': !file.isDirectory && currentPlayInfo.playList.length!==1 && hasDirectory && !file.path.startsWith('./'),
-              'active-style': currentPlayInfo.path!==undefined && currentPlayInfo.path === file.path
-            }"
+          'max-width-95': !file.isDirectory && currentPlayInfo.playList.length!==1 && hasDirectory && !file.path.startsWith('./'),
+          'active-style': currentPlayInfo.path!==undefined && currentPlayInfo.path === file.path
+        }"
         >
-
-          <span class="file-name" :title="file.fileName">
-            <span v-if="file.isDirectory">{{ file.isVisible.value ? '📂' : '📁' }}{{ file.fileName }}</span>
-            <span v-else>📄{{ file.fileName }}</span>
-          </span>
+      <span class="file-name" :title="file.fileName">
+        <span v-if="file.isDirectory">{{ file.isVisible.value ? '📂' : '📁' }}{{ file.index }} {{ file.fileName }}</span>
+        <span v-else>📄{{ file.index }} {{ file.fileName }}</span>
+      </span>
           <span v-if="file.duration" class="file-duration">
-            {{ formatDuration(file.duration) }}
-          </span>
+        {{ formatDuration(file.duration) }}
+      </span>
         </button>
       </li>
     </ul>
@@ -101,26 +100,28 @@ async function listFilesInDirectory(directoryHandle: FileSystemDirectoryHandle) 
 
 async function traverseDirectory(
     entries: { entry: FileSystemHandle, path: string }[],
-    // directoryHandle: FileSystemDirectoryHandle,
     parentPath: string,
-    isVisible: { value: boolean } = {value: true}
+    isVisible: { value: boolean } = {value: true},
+    parentIndex: string = '' // 添加父级编号
 ) {
-  for (const {entry, path} of entries) {
+  for (let i = 0; i < entries.length; i++) {
+    const {entry, path} = entries[i];
+    const currentIndex = parentIndex ? `${parentIndex}.${i + 1}` : `${i + 1}`; // 生成当前编号
+
     if (entry.kind === 'file') {
       const fileHandle = entry;
-      // console.log('fileHandle', fileHandle, 'path', path);
       const file = await fileHandle.getFile();
       const fileUrl = URL.createObjectURL(file);
       const duration = await getVideoDuration(fileUrl);
 
-      // 只保留文件名，不包含路径
       currentPlayInfo.playList.push({
         fileHandle,
         fileName: file.name,
         duration,
         isDirectory: false,
         path,
-        isVisible: isVisible
+        isVisible: isVisible,
+        index: currentIndex // 添加编号
       });
     } else if (entry.kind === 'directory') {
       const isVisible = {value: false};
@@ -130,16 +131,18 @@ async function traverseDirectory(
         subEntries.push({entry: subEntry, path: `${subDirectoryPath}/${subEntry.name}`});
       }
 
-      // 对子文件夹中的文件和子文件夹按完整路径进行排序
-      // subEntries.sort((a, b) => naturalSort(a.path, b.path));
-
-      currentPlayInfo.playList.push({fileHandle: entry, fileName: subDirectoryPath, isDirectory: true, isVisible});
+      currentPlayInfo.playList.push({
+        fileHandle: entry,
+        fileName: subDirectoryPath,
+        isDirectory: true,
+        isVisible,
+        index: currentIndex // 添加编号
+      });
       hasDirectory.value = true;
-      await traverseDirectory(subEntries, subDirectoryPath, isVisible);
+      await traverseDirectory(subEntries, subDirectoryPath, isVisible, currentIndex); // 传递当前编号
     }
   }
 }
-
 
 async function emitFileSelected(fileItem: FileItem) {
   // console.log("emitFileSelected fileInfoStatic",fileItem)
